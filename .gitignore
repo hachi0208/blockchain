@@ -1,0 +1,6 @@
+bitcoin-backend/.env
+bitcoin-backend/.venv
+bitcoin-backend/venv
+bitcoin-backend/db.sqlite3
+
+bitcoin-frontend/.env.local
