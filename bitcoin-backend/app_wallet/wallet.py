@@ -27,18 +27,25 @@ class Wallet(object):
     def blockchain_address(self):
         return self._blockchain_address
 
+    # このアドレスは送信もととかに使われるやつ
     def generate_blockchain_address(self):
+        # ECDSAを使ってpublickeyを生成
         public_key_bytes = self._public_key.to_string()
+        # 公開鍵にSHA-256ハッシュ関数を適用し、ハッシュ値を取得します。
         sha256_bpk = hashlib.sha256(public_key_bytes)
         sha256_bpk_digest = sha256_bpk.digest()
 
+        # SHA-256ハッシュ値にさらにRIPEMD-160ハッシュ関数を適用します。これにより、公開鍵から短いハッシュ値が生成されます。
         ripemed160_bpk = hashlib.new('ripemd160')
         ripemed160_bpk.update(sha256_bpk_digest)
         ripemed160_bpk_digest = ripemed160_bpk.digest()
         ripemed160_bpk_hex = codecs.encode(ripemed160_bpk_digest, 'hex')
 
+        # ネットワークバイト（ビットコインのメインネットワークでは 00）をRIPEMD-160ハッシュの前に追加します。
         network_byte = b'00'
         network_bitcoin_public_key = network_byte + ripemed160_bpk_hex
+
+        # ネットワークバイトを含むハッシュ値に対して、さらに2回SHA-256ハッシュ関数を適用します。
         network_bitcoin_public_key_bytes = codecs.decode(
             network_bitcoin_public_key, 'hex')
 
@@ -48,10 +55,14 @@ class Wallet(object):
         sha256_2_nbpk_digest = sha256_2_nbpk.digest()
         sha256_hex = codecs.encode(sha256_2_nbpk_digest, 'hex')
 
+        # ダブルSHA-256ハッシュの最初の4バイト（8文字の16進数）をチェックサムとして使用し、
+        # これをネットワークバイトとRIPEMD-160ハッシュ値の組み合わせに追加します。
         checksum = sha256_hex[:8]
 
         address_hex = (network_bitcoin_public_key + checksum).decode('utf-8')
 
+        #Base58エンコーディングを適用して、ユーザーフレンドリーなブロックチェーンアドレスを生成します。
+        # これにより、アドレスは英数字のみで構成され、ビットコインアドレスとして認識されやすくなります。
         blockchain_address = base58.b58encode(address_hex).decode('utf-8')
         return blockchain_address
 

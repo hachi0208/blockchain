@@ -8,6 +8,7 @@ import urllib.parse
 
 
 # Create your views here.
+# postでこれらを作成
 class WalletAPIView(APIView):
     def post(self, request, *args, **kwargs):
         my_wallet = Wallet()
