@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .blockchain import BlockChain
+from .models import BlockChainModel
+
 
 # Create your views here.
 # グローバル変数としてブロックチェーンインスタンスを作成
@@ -14,10 +16,13 @@ class ChainAPIView(APIView):
         return Response({'chain': chain}, status=status.HTTP_200_OK)
 
 class MineAPIView(APIView):
-    def get(self, request, *args, **kwargs):
-        result = blockchain.mining()
+    #postに変更。誰がminingしたかわからない
+    def post(self, request, *args, **kwargs):
+        blockchain_address = request.data.get('blockchain_address')
+        print(blockchain_address)
+        result = blockchain.mining(blockchain_address)
         if result:
-            return Response({'message': 'New block mined'}, status=status.HTTP_200_OK)
+            return Response({'message': 'New block mined'}, status=status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Mining failed'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -31,6 +36,7 @@ class TransactionAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
+        print(data)
         required = [
             'sender_blockchain_address',
             'recipient_blockchain_address',

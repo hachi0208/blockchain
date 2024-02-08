@@ -47,7 +47,7 @@ class TransactionAPIView(APIView):
         }
 
         response = requests.post(
-            urllib.parse.urljoin('http://127.0.0.1:5000', 'transactions'),
+            urllib.parse.urljoin('http://127.0.0.1:8000', 'api/transactions'),
             json=json_data, timeout=3)
 
         if response.status_code == 201:

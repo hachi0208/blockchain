@@ -181,13 +181,14 @@ class BlockChain(object):
             nonce += 1
         return nonce
 
-    def mining(self):
+    def mining(self, blockchain_address):
         # if not self.transaction_pool:
         #     return False
+        print(blockchain_address)
 
         self.add_transaction(
             sender_blockchain_address=MINING_SENDER,
-            recipient_blockchain_address=self.blockchain_address,
+            recipient_blockchain_address=blockchain_address,
             value=MINING_REWARD)
         nonce = self.proof_of_work()
         previous_hash = self.hash(self.chain[-1])
