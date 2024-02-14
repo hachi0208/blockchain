@@ -1,0 +1,98 @@
+#必要なリストとmethodの定義
+class TodoAppClass:
+
+    def __init__(self):
+        """
+        (todo:str, is_completed:bool)のタプルのリスト。文字のリストではない。
+        is_completedはそのタスクが完了したかどうか
+        """
+        self.todos = []
+
+    #新しいtodoをis_completedがfalseで追加
+    def add(self, name):
+        self.todos.append((name, False))
+
+    def show(self, sort=False, show_all=False):
+        #文字列のリスト（is_completedは含めない）
+        show_todo_list = []
+
+        if show_all:
+            #is_completedに関わらず全todoを表示
+            for name, _ in self.todos:
+                show_todo_list.append(name)
+        else:
+            #未完了のtodoを表示
+            for name, is_completed in self.todos:
+                if not is_completed:
+                    show_todo_list.append(name)
+
+        if sort:
+            show_todo_list = sorted(show_todo_list)
+
+        for todo in show_todo_list:
+            print(todo)
+
+    #old_nameをnew_nameに置き換え
+    def update(self, old_name, new_name):
+        for i, (name, is_completed) in enumerate(self.todos):
+            if name == old_name:
+                self.todos[i] = (new_name, is_completed)
+                break
+
+    #指定された名前を持つtodoを探して削除
+    def delete(self, name):
+        for todo_name, is_completed in self.todos:
+            if todo_name == name:
+                self.todos.remove((todo_name, is_completed))
+                break
+
+    #指定された名前をもつtodoのis_completedをtrueに
+    def done(self, name):
+        for i, (todo_name, _) in enumerate(self.todos):
+            if todo_name == name:
+                self.todos[i] = (name, True)
+                break
+
+    #全todoのis_completedをtrueに
+    def done_all(self):
+        for i, (name, _) in enumerate(self.todos):
+            #各TODOを完了状態に
+            self.todos[i] = (name, True)
+
+
+#コマンドの実行
+def execte_command(todo_list, commands):
+    if commands[0] == "add":
+        todo_list.add(commands[1])
+    elif commands[0] == "update":
+        todo_list.update(commands[1], commands[2])
+    elif commands[0] == "delete":
+        todo_list.delete(commands[1])
+    elif commands[0] == "done":
+        todo_list.done(commands[1])
+    elif commands[0] == "doneAll":
+        todo_list.done_all()
+    elif commands[0] == "show":
+        sort_option = "sorted" in commands
+        all_option = "all" in commands
+        todo_list.show(sort=sort_option, show_all=all_option)
+    else:
+        print("そのようなコマンドは存在しません。")
+
+
+def main():
+
+    n_lines = int(input())
+    todo_list = TodoAppClass()
+
+    for _ in range(n_lines):
+        command_line = input().strip()
+        commands = command_line.split()
+
+        #コマンドの実行
+        execte_command(todo_list, commands)
+
+
+
+if __name__ == "__main__":
+    main()

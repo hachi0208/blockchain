@@ -23,7 +23,7 @@ MINING_REWARD = 1.0
 MINING_TIMER_SEC = 20
 
 #どこのportで動かすか
-BLOCKCHAIN_PORT_RANGE = (5000, 5003)
+BLOCKCHAIN_PORT_RANGE = (8000, 8003)
 NEIGHBOURS_IP_RANGE_NUM = (0, 1)
 BLOCKCHAIN_NEIGHBOURS_SYNC_TIME_SEC = 20
 
@@ -49,7 +49,7 @@ class BlockChain(object):
     def run(self):
         self.sync_neighbours()
         self.resolve_conflicts()
-        self.start_mining()
+        #self.start_mining()
 
     def set_neighbours(self):
         self.neighbours = find_neighbours(
@@ -222,9 +222,11 @@ class BlockChain(object):
                     total_amount -= value
         return total_amount
 
+    # blockchainが有効であるかどうか
     def valid_chain(self, chain):
         pre_block = chain[0]
         current_index = 1
+        # blockが全部有効かチェック
         while current_index < len(chain):
             block = chain[current_index]
             if block['previous_hash'] != self.hash(pre_block):
@@ -239,6 +241,7 @@ class BlockChain(object):
             current_index += 1
         return True
 
+    # 他のノードと比較し、他のノードの方が長ければそれに自分も反映させる
     def resolve_conflicts(self):
         longest_chain = None
         max_length = len(self.chain)
