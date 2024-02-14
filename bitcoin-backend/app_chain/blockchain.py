@@ -5,7 +5,7 @@ import logging
 import sys
 import time
 import threading
-
+import os
 from ecdsa import NIST256p
 from ecdsa import VerifyingKey
 import requests
@@ -13,8 +13,9 @@ import requests
 from .utils import sorted_dict_by_key, find_neighbours, get_host
 
 
+
 #0が最初に何個揃うか
-MINING_DIFFICULTY = 3
+MINING_DIFFICULTY = 4
 
 MINING_SENDER = 'THE BLOCKCHAIN'
 
@@ -49,7 +50,7 @@ class BlockChain(object):
     def run(self):
         self.sync_neighbours()
         self.resolve_conflicts()
-        #self.start_mining()
+        self.start_mining()
 
     def set_neighbours(self):
         self.neighbours = find_neighbours(
@@ -95,7 +96,7 @@ class BlockChain(object):
         self.transaction_pool = []
 
         for node in self.neighbours:
-            requests.delete(f'http://{node}/transactions')
+            requests.delete(f'http://{node}/api/transactions')
 
         return block
 
@@ -140,7 +141,7 @@ class BlockChain(object):
         if is_transacted:
             for node in self.neighbours:
                 requests.put(
-                    f'http://{node}/transactions',
+                    f'http://{node}/api/transactions',
                     json={
                         'sender_blockchain_address': sender_blockchain_address,
                         'recipient_blockchain_address':
@@ -196,16 +197,17 @@ class BlockChain(object):
         logger.info({'action': 'mining', 'status': 'success'})
 
         for node in self.neighbours:
-            requests.put(f'http://{node}/consensus')
+            requests.put(f'http://{node}/api/consensus')
 
         return True
 
     def start_mining(self):
+        port = f"{os.getenv('DJANGO_SERVER_PORT', '8000')}+port"
         is_acquire = self.mining_semaphore.acquire(blocking=False)
         if is_acquire:
             with contextlib.ExitStack() as stack:
                 stack.callback(self.mining_semaphore.release)
-                self.mining()
+                self.mining(port)
                 loop = threading.Timer(MINING_TIMER_SEC, self.start_mining)
                 loop.start()
 
@@ -246,7 +248,7 @@ class BlockChain(object):
         longest_chain = None
         max_length = len(self.chain)
         for node in self.neighbours:
-            response = requests.get(f'http://{node}/chain')
+            response = requests.get(f'http://{node}/api/chain')
             if response.status_code == 200:
                 response_json = response.json()
                 chain = response_json['chain']
